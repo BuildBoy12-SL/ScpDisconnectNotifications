@@ -28,7 +28,7 @@ namespace ScpDisconnectNotifications
         public override Version Version { get; } = new Version(1, 0, 0);
 
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion { get; } = new Version(5, 0, 0);
+        public override Version RequiredExiledVersion { get; } = new Version(4, 2, 5);
 
         /// <summary>
         /// Gets an instance of the <see cref="ScpDisconnectNotifications.WebhookController"/> class.
@@ -46,7 +46,7 @@ namespace ScpDisconnectNotifications
 
             WebhookController = new WebhookController(this);
             eventHandlers = new EventHandlers(this);
-            Exiled.Events.Handlers.Player.Died += eventHandlers.OnDied;
+            Exiled.Events.Handlers.Player.Dying += eventHandlers.OnDying;
             Exiled.Events.Handlers.Player.Left += eventHandlers.OnLeft;
             base.OnEnabled();
         }
@@ -54,6 +54,7 @@ namespace ScpDisconnectNotifications
         /// <inheritdoc/>
         public override void OnDisabled()
         {
+            Exiled.Events.Handlers.Player.Dying -= eventHandlers.OnDying;
             Exiled.Events.Handlers.Player.Left -= eventHandlers.OnLeft;
             eventHandlers = null;
             base.OnDisabled();
