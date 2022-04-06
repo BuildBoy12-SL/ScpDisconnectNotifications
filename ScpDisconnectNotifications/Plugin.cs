@@ -54,6 +54,7 @@ namespace ScpDisconnectNotifications
         /// <inheritdoc/>
         public override void OnDisabled()
         {
+            Exiled.Events.Handlers.Player.Died -= eventHandlers.OnDied;
             Exiled.Events.Handlers.Player.Left -= eventHandlers.OnLeft;
             eventHandlers = null;
             base.OnDisabled();
