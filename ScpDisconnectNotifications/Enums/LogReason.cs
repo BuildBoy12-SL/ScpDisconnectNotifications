@@ -13,9 +13,14 @@ namespace ScpDisconnectNotifications.Enums
     public enum LogReason
     {
         /// <summary>
-        /// The player has committed suicide.
+        /// The player has died to a tesla gate.
         /// </summary>
-        Suicide,
+        Tesla,
+
+        /// <summary>
+        /// The player has died to the void.
+        /// </summary>
+        Void,
 
         /// <summary>
         /// The player has left the game.

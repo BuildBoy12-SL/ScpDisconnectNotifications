@@ -29,8 +29,18 @@ namespace ScpDisconnectNotifications
         /// <inheritdoc cref="Exiled.Events.Handlers.Player.OnDied(DiedEventArgs)"/>
         public void OnDying(DyingEventArgs ev)
         {
-            if (ev.IsAllowed && Round.IsStarted && plugin.Config.LoggedRoles.Contains(ev.Target.Role) && ev.Handler.Type == DamageType.Tesla)
-                plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.Target.Role, LogReason.Suicide));
+            if (!ev.IsAllowed || !Round.IsStarted || !plugin.Config.LoggedRoles.Contains(ev.Target.Role))
+                return;
+
+            switch (ev.Handler.Type)
+            {
+                case DamageType.Tesla:
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.Target.Role, LogReason.Tesla));
+                    break;
+                case DamageType.Crushed:
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.Target.Role, LogReason.Void));
+                    break;
+            }
         }
 
         /// <inheritdoc cref="Exiled.Events.Handlers.Player.OnLeft(LeftEventArgs)"/>

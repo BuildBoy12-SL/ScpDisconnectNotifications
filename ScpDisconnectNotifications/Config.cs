@@ -10,7 +10,7 @@ namespace ScpDisconnectNotifications
     using System.Collections.Generic;
     using System.ComponentModel;
     using Exiled.API.Interfaces;
-    using ScpDisconnectNotifications.Configs;
+    using ScpDisconnectNotifications.Enums;
 
     /// <inheritdoc />
     public class Config : IConfig
@@ -31,12 +31,6 @@ namespace ScpDisconnectNotifications
         public bool ShowUserId { get; set; } = false;
 
         /// <summary>
-        /// Gets or sets a value indicating whether an embed will be used instead of a normal message.
-        /// </summary>
-        [Description("Whether an embed will be used instead of a normal message.")]
-        public bool UseEmbed { get; set; } = false;
-
-        /// <summary>
         /// Gets or sets the roles to be logged.
         /// </summary>
         [Description("The roles to be logged.")]
@@ -53,13 +47,13 @@ namespace ScpDisconnectNotifications
         };
 
         /// <summary>
-        /// Gets or sets configs related to the embed.
+        /// Gets or sets the translations for the various messages.
         /// </summary>
-        public EmbedSettings EmbedSettings { get; set; } = new EmbedSettings();
-
-        /// <summary>
-        /// Gets or sets configs related to the message.
-        /// </summary>
-        public MessageSettings MessageSettings { get; set; } = new MessageSettings();
+        public Dictionary<LogReason, string> MessageTranslations { get; set; } = new Dictionary<LogReason, string>
+        {
+            { LogReason.Void, "{0} has killed themselves in the void as a {1}." },
+            { LogReason.Tesla, "{0} has killed themselves on a tesla gate as a {1}." },
+            { LogReason.Left, "{0} has disconnected as a {1}." },
+        };
     }
 }

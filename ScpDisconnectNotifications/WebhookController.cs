@@ -11,7 +11,6 @@ namespace ScpDisconnectNotifications
     using DSharp4Webhook.Core;
     using DSharp4Webhook.Core.Constructor;
     using Exiled.API.Features;
-    using ScpDisconnectNotifications.Enums;
     using ScpDisconnectNotifications.Models;
 
     /// <summary>
@@ -19,8 +18,6 @@ namespace ScpDisconnectNotifications
     /// </summary>
     public class WebhookController : IDisposable
     {
-        private static readonly EmbedBuilder EmbedBuilder = ConstructorProvider.GetEmbedBuilder();
-        private static readonly EmbedFieldBuilder FieldBuilder = ConstructorProvider.GetEmbedFieldBuilder();
         private static readonly MessageBuilder MessageBuilder = ConstructorProvider.GetMessageBuilder();
         private readonly Plugin plugin;
         private readonly IWebhook webhook;
@@ -45,7 +42,10 @@ namespace ScpDisconnectNotifications
             if (isDisposed)
                 throw new ObjectDisposedException(nameof(WebhookController));
 
-            MessageBuilder messageBuilder = plugin.Config.UseEmbed ? PrepareEmbed(discordLog) : PrepareMessage(discordLog);
+            MessageBuilder messageBuilder = PrepareMessage(discordLog);
+            if (messageBuilder is null)
+                return;
+
             webhook.SendMessage(messageBuilder.Build()).Queue((result, isSuccessful) =>
             {
                 if (!isSuccessful)
@@ -60,8 +60,6 @@ namespace ScpDisconnectNotifications
             webhook?.Dispose();
         }
 
-        private static string CodeLine(string message) => $"```{message}```";
-
         private MessageBuilder PrepareMessage(DiscordLog discordLog)
         {
             if (isDisposed)
@@ -69,32 +67,10 @@ namespace ScpDisconnectNotifications
 
             MessageBuilder.Reset();
 
-            string toFormat = discordLog.LogReason == LogReason.Left ? plugin.Config.MessageSettings.LeftFormat : plugin.Config.MessageSettings.SuicideFormat;
+            if (!plugin.Config.MessageTranslations.TryGetValue(discordLog.LogReason, out string toFormat))
+                return null;
+
             MessageBuilder.Append(string.Format(toFormat, discordLog.PlayerName, discordLog.Role.ToString()));
-            return MessageBuilder;
-        }
-
-        private MessageBuilder PrepareEmbed(DiscordLog discordLog)
-        {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(WebhookController));
-
-            EmbedBuilder.Reset();
-            FieldBuilder.Reset();
-            MessageBuilder.Reset();
-
-            FieldBuilder.Inline = false;
-
-            FieldBuilder.Name = discordLog.LogReason == LogReason.Left ? plugin.Config.EmbedSettings.UserDisconnected : plugin.Config.EmbedSettings.UserSuicided;
-            FieldBuilder.Value = CodeLine(discordLog.PlayerName);
-            EmbedBuilder.AddField(FieldBuilder.Build());
-
-            FieldBuilder.Name = plugin.Config.EmbedSettings.Role;
-            FieldBuilder.Value = CodeLine(discordLog.Role.ToString());
-            EmbedBuilder.AddField(FieldBuilder.Build());
-
-            MessageBuilder.AddEmbed(EmbedBuilder.Build());
-
             return MessageBuilder;
         }
     }

@@ -24,7 +24,7 @@ namespace ScpDisconnectNotifications.Models
         /// <param name="logReason"><inheritdoc cref="LogReason"/></param>
         public DiscordLog(Player player, Plugin plugin, RoleType role, LogReason logReason)
         {
-            PlayerName = plugin.Config.ShowUserId ? player.Nickname + " " + $"({player.UserId})" : player.Nickname;
+            PlayerName = plugin.Config.ShowUserId ? player.Nickname + $" ({player.UserId})" : player.Nickname;
             Role = role;
             LogReason = logReason;
         }
