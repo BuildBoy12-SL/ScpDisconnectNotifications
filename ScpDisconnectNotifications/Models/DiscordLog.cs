@@ -35,7 +35,7 @@ namespace ScpDisconnectNotifications.Models
         public string Name { get; }
 
         /// <summary>
-        /// Gets or sets the player's user id.
+        /// Gets the player's user id.
         /// </summary>
         public string Id { get; }
 
