@@ -99,6 +99,7 @@ namespace ScpDisconnectNotifications
 
             EmbedBuilder.Color = (uint)DSharp4Webhook.Util.ColorUtil.FromHex(color);
             EmbedBuilder.Timestamp = DateTimeOffset.UtcNow;
+            MessageBuilder.AddEmbed(EmbedBuilder.Build());
 
             return MessageBuilder;
         }
