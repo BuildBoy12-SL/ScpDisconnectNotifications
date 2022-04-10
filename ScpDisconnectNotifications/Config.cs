@@ -10,7 +10,6 @@ namespace ScpDisconnectNotifications
     using System.Collections.Generic;
     using System.ComponentModel;
     using Exiled.API.Interfaces;
-    using ScpDisconnectNotifications.Enums;
 
     /// <inheritdoc />
     public class Config : IConfig
@@ -44,16 +43,6 @@ namespace ScpDisconnectNotifications
             RoleType.Scp0492,
             RoleType.Scp93953,
             RoleType.Scp93989,
-        };
-
-        /// <summary>
-        /// Gets or sets the translations for the various messages.
-        /// </summary>
-        public Dictionary<LogReason, string> MessageTranslations { get; set; } = new Dictionary<LogReason, string>
-        {
-            { LogReason.Void, "{0} has killed themselves in the void as a {1}." },
-            { LogReason.Tesla, "{0} has killed themselves on a tesla gate as a {1}." },
-            { LogReason.Left, "{0} has disconnected as a {1}." },
         };
     }
 }

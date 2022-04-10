@@ -35,10 +35,10 @@ namespace ScpDisconnectNotifications
             switch (ev.Handler.Type)
             {
                 case DamageType.Tesla:
-                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.Target.Role, LogReason.Tesla));
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, ev.Target.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Tesla));
                     break;
                 case DamageType.Crushed:
-                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.Target.Role, LogReason.Void));
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, ev.Target.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Void));
                     break;
             }
         }
@@ -47,7 +47,7 @@ namespace ScpDisconnectNotifications
         public void OnLeft(LeftEventArgs ev)
         {
             if (Round.IsStarted && plugin.Config.LoggedRoles.Contains(ev.Player.Role))
-                plugin.WebhookController.SendMessage(new DiscordLog(ev.Player, plugin, ev.Player.Role, LogReason.Left));
+                plugin.WebhookController.SendMessage(new DiscordLog(ev.Player, ev.Player.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Left));
         }
     }
 }

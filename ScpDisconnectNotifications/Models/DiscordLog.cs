@@ -19,25 +19,30 @@ namespace ScpDisconnectNotifications.Models
         /// Initializes a new instance of the <see cref="DiscordLog"/> struct.
         /// </summary>
         /// <param name="player">The player to log.</param>
-        /// <param name="plugin">An instance of the plugin class.</param>
         /// <param name="role"><inheritdoc cref="Role"/></param>
         /// <param name="logReason"><inheritdoc cref="LogReason"/></param>
-        public DiscordLog(Player player, Plugin plugin, RoleType role, LogReason logReason)
+        public DiscordLog(Player player, string role, LogReason logReason)
         {
-            PlayerName = plugin.Config.ShowUserId ? player.Nickname + $" ({player.UserId})" : player.Nickname;
+            Name = player.Nickname;
+            Id = player.UserId;
             Role = role;
             LogReason = logReason;
         }
 
         /// <summary>
-        /// Gets the player's name field.
+        /// Gets the player's name.
         /// </summary>
-        public string PlayerName { get; }
+        public string Name { get; }
+
+        /// <summary>
+        /// Gets or sets the player's user id.
+        /// </summary>
+        public string Id { get; }
 
         /// <summary>
         /// Gets the role of the player.
         /// </summary>
-        public RoleType Role { get; }
+        public string Role { get; }
 
         /// <summary>
         /// Gets the reason for logging.

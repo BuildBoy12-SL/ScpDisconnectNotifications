@@ -11,7 +11,7 @@ namespace ScpDisconnectNotifications
     using Exiled.API.Features;
 
     /// <inheritdoc />
-    public class Plugin : Plugin<Config>
+    public class Plugin : Plugin<Config, Translation>
     {
         private EventHandlers eventHandlers;
 

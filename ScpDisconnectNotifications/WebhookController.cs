@@ -18,6 +18,8 @@ namespace ScpDisconnectNotifications
     /// </summary>
     public class WebhookController : IDisposable
     {
+        private static readonly EmbedBuilder EmbedBuilder = ConstructorProvider.GetEmbedBuilder();
+        private static readonly EmbedFieldBuilder FieldBuilder = ConstructorProvider.GetEmbedFieldBuilder();
         private static readonly MessageBuilder MessageBuilder = ConstructorProvider.GetMessageBuilder();
         private readonly Plugin plugin;
         private readonly IWebhook webhook;
@@ -60,17 +62,44 @@ namespace ScpDisconnectNotifications
             webhook?.Dispose();
         }
 
+        private static string Codeline(string line) => $"```{line}```";
+
         private MessageBuilder PrepareMessage(DiscordLog discordLog)
         {
             if (isDisposed)
                 throw new ObjectDisposedException(nameof(WebhookController));
 
+            EmbedBuilder.Reset();
+            FieldBuilder.Reset();
             MessageBuilder.Reset();
 
-            if (!plugin.Config.MessageTranslations.TryGetValue(discordLog.LogReason, out string toFormat))
+            if (!plugin.Translation.Headers.TryGetValue(discordLog.LogReason, out string header) ||
+                !plugin.Translation.Colors.TryGetValue(discordLog.LogReason, out string color))
+            {
+                Log.Error("Undefined header or color for log reason: " + discordLog.LogReason);
                 return null;
+            }
 
-            MessageBuilder.Append(string.Format(toFormat, discordLog.PlayerName, discordLog.Role.ToString()));
+            FieldBuilder.Inline = false;
+
+            FieldBuilder.Name = header;
+            FieldBuilder.Value = Codeline(discordLog.Name);
+            EmbedBuilder.AddField(FieldBuilder.Build());
+
+            if (plugin.Config.ShowUserId)
+            {
+                FieldBuilder.Name = plugin.Translation.UserId;
+                FieldBuilder.Value = Codeline(discordLog.Id);
+                EmbedBuilder.AddField(FieldBuilder.Build());
+            }
+
+            FieldBuilder.Name = plugin.Translation.Role;
+            FieldBuilder.Value = Codeline(discordLog.Role);
+            EmbedBuilder.AddField(FieldBuilder.Build());
+
+            EmbedBuilder.Color = (uint)DSharp4Webhook.Util.ColorUtil.FromHex(color);
+            EmbedBuilder.Timestamp = DateTimeOffset.UtcNow;
+
             return MessageBuilder;
         }
     }
