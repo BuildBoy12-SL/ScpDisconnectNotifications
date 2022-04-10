@@ -11,7 +11,7 @@ namespace ScpDisconnectNotifications
     using Exiled.API.Features;
 
     /// <inheritdoc />
-    public class Plugin : Plugin<Config>
+    public class Plugin : Plugin<Config, Translation>
     {
         private EventHandlers eventHandlers;
 
@@ -46,7 +46,7 @@ namespace ScpDisconnectNotifications
 
             WebhookController = new WebhookController(this);
             eventHandlers = new EventHandlers(this);
-            Exiled.Events.Handlers.Player.Died += eventHandlers.OnDied;
+            Exiled.Events.Handlers.Player.Dying += eventHandlers.OnDying;
             Exiled.Events.Handlers.Player.Left += eventHandlers.OnLeft;
             base.OnEnabled();
         }
@@ -54,7 +54,7 @@ namespace ScpDisconnectNotifications
         /// <inheritdoc/>
         public override void OnDisabled()
         {
-            Exiled.Events.Handlers.Player.Died -= eventHandlers.OnDied;
+            Exiled.Events.Handlers.Player.Dying -= eventHandlers.OnDying;
             Exiled.Events.Handlers.Player.Left -= eventHandlers.OnLeft;
             eventHandlers = null;
             base.OnDisabled();

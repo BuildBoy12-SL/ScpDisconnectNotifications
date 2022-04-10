@@ -27,17 +27,27 @@ namespace ScpDisconnectNotifications
         public EventHandlers(Plugin plugin) => this.plugin = plugin;
 
         /// <inheritdoc cref="Exiled.Events.Handlers.Player.OnDied(DiedEventArgs)"/>
-        public void OnDied(DiedEventArgs ev)
+        public void OnDying(DyingEventArgs ev)
         {
-            if (Round.IsStarted && plugin.Config.LoggedRoles.Contains(ev.TargetOldRole) && ev.Handler.Type == DamageType.Tesla)
-                plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, plugin, ev.TargetOldRole, LogReason.Suicide));
+            if (!ev.IsAllowed || !Round.IsStarted || !plugin.Config.LoggedRoles.Contains(ev.Target.Role.Type))
+                return;
+
+            switch (ev.Handler.Type)
+            {
+                case DamageType.Tesla:
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, ev.Target.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Tesla));
+                    break;
+                case DamageType.Crushed:
+                    plugin.WebhookController.SendMessage(new DiscordLog(ev.Target, ev.Target.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Void));
+                    break;
+            }
         }
 
         /// <inheritdoc cref="Exiled.Events.Handlers.Player.OnLeft(LeftEventArgs)"/>
         public void OnLeft(LeftEventArgs ev)
         {
             if (Round.IsStarted && plugin.Config.LoggedRoles.Contains(ev.Player.Role.Type))
-                plugin.WebhookController.SendMessage(new DiscordLog(ev.Player, plugin, ev.Player.Role.Type, LogReason.Left));
+                plugin.WebhookController.SendMessage(new DiscordLog(ev.Player, ev.Player.ReferenceHub.characterClassManager.CurRole.fullName, LogReason.Left));
         }
     }
 }

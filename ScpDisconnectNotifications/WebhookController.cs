@@ -11,7 +11,6 @@ namespace ScpDisconnectNotifications
     using DSharp4Webhook.Core;
     using DSharp4Webhook.Core.Constructor;
     using Exiled.API.Features;
-    using ScpDisconnectNotifications.Enums;
     using ScpDisconnectNotifications.Models;
 
     /// <summary>
@@ -45,11 +44,14 @@ namespace ScpDisconnectNotifications
             if (isDisposed)
                 throw new ObjectDisposedException(nameof(WebhookController));
 
-            MessageBuilder messageBuilder = plugin.Config.UseEmbed ? PrepareEmbed(discordLog) : PrepareMessage(discordLog);
+            MessageBuilder messageBuilder = PrepareMessage(discordLog);
+            if (messageBuilder is null)
+                return;
+
             webhook.SendMessage(messageBuilder.Build()).Queue((result, isSuccessful) =>
             {
                 if (!isSuccessful)
-                    Log.Warn("Failed to send scp disconnect message.");
+                    Log.Warn("Failed to send message.");
             });
         }
 
@@ -60,21 +62,9 @@ namespace ScpDisconnectNotifications
             webhook?.Dispose();
         }
 
-        private static string CodeLine(string message) => $"```{message}```";
+        private static string Codeline(string line) => $"```{line}```";
 
         private MessageBuilder PrepareMessage(DiscordLog discordLog)
-        {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(WebhookController));
-
-            MessageBuilder.Reset();
-
-            string toFormat = discordLog.LogReason == LogReason.Left ? plugin.Config.MessageSettings.LeftFormat : plugin.Config.MessageSettings.SuicideFormat;
-            MessageBuilder.Append(string.Format(toFormat, discordLog.PlayerName, discordLog.Role.ToString()));
-            return MessageBuilder;
-        }
-
-        private MessageBuilder PrepareEmbed(DiscordLog discordLog)
         {
             if (isDisposed)
                 throw new ObjectDisposedException(nameof(WebhookController));
@@ -83,16 +73,32 @@ namespace ScpDisconnectNotifications
             FieldBuilder.Reset();
             MessageBuilder.Reset();
 
+            if (!plugin.Translation.Headers.TryGetValue(discordLog.LogReason, out string header) ||
+                !plugin.Translation.Colors.TryGetValue(discordLog.LogReason, out string color))
+            {
+                Log.Error("Undefined header or color for log reason: " + discordLog.LogReason);
+                return null;
+            }
+
             FieldBuilder.Inline = false;
 
-            FieldBuilder.Name = discordLog.LogReason == LogReason.Left ? plugin.Config.EmbedSettings.UserDisconnected : plugin.Config.EmbedSettings.UserSuicided;
-            FieldBuilder.Value = CodeLine(discordLog.PlayerName);
+            FieldBuilder.Name = header;
+            FieldBuilder.Value = Codeline(discordLog.Name);
             EmbedBuilder.AddField(FieldBuilder.Build());
 
-            FieldBuilder.Name = plugin.Config.EmbedSettings.Role;
-            FieldBuilder.Value = CodeLine(discordLog.Role.ToString());
+            if (plugin.Config.ShowUserId)
+            {
+                FieldBuilder.Name = plugin.Translation.UserId;
+                FieldBuilder.Value = Codeline(discordLog.Id);
+                EmbedBuilder.AddField(FieldBuilder.Build());
+            }
+
+            FieldBuilder.Name = plugin.Translation.Role;
+            FieldBuilder.Value = Codeline(discordLog.Role);
             EmbedBuilder.AddField(FieldBuilder.Build());
 
+            EmbedBuilder.Color = (uint)DSharp4Webhook.Util.ColorUtil.FromHex(color);
+            EmbedBuilder.Timestamp = DateTimeOffset.UtcNow;
             MessageBuilder.AddEmbed(EmbedBuilder.Build());
 
             return MessageBuilder;
